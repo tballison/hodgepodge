@@ -16,10 +16,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-
+    <packaging>pom</packaging>
     <modules>
         <module>droid-wrapper</module>
         <module>iwa-dev</module>
         <module>poi-play</module>
+        <module>crawler</module>
+        <module>general-munging</module>
     </modules>
 </project>
