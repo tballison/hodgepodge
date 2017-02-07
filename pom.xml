@@ -23,5 +23,7 @@
         <module>poi-play</module>
         <module>crawler</module>
         <module>general-munging</module>
+        <module>tika-integration-test</module>
+        <module>wiki-munging</module>
     </modules>
 </project>
