@@ -25,5 +25,6 @@
         <module>general-munging</module>
         <module>tika-integration-test</module>
         <module>wiki-munging</module>
+        <module>html-analysis</module>
     </modules>
 </project>

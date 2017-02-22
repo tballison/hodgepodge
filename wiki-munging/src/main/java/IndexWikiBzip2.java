@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,15 +19,13 @@ import com.optimaize.langdetect.profiles.LanguageProfileReader;
 import com.optimaize.langdetect.text.CommonTextObjectFactories;
 import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.tika.eval.tokens.AnalyzerManager;
 import org.wikiclean.WikiClean;
 import org.wikiclean.WikiCleanBuilder;
 import org.wikiclean.WikipediaBz2DumpInputStream;
@@ -60,14 +59,17 @@ public class IndexWikiBzip2 {
         String page;
         int pages = 0;
 
-        maxPages = -1;
-        int totalReports = 10000000;//countReports(bzipDir, fieldName);
+        int totalReports = countReports(bzipDir, fieldName);
         double samplingRate = (double)(maxPages+1000)/(double)totalReports;
+        samplingRate = (samplingRate > 1.0) ? -1.0 : samplingRate;
         System.err.println("finished counting reports: "+ totalReports + " with a sampling rate: " + samplingRate);
         Random random = new Random();
         for (File bzip : bzipDir.toFile().listFiles()) {
             if (!bzip.getName().startsWith(fieldName)) {
                 continue;
+            }
+            if (maxPages > -1 && pages > maxPages) {
+                break;
             }
             WikipediaBz2DumpInputStream stream =
                     new WikipediaBz2DumpInputStream(bzip.getAbsolutePath().toString());
@@ -84,6 +86,9 @@ public class IndexWikiBzip2 {
 
 
             while ((page = stream.readNext()) != null) {
+                if (maxPages > -1 && pages > maxPages) {
+                    break;
+                }
                 if (page.contains("<ns>") && !page.contains("<ns>0</ns>")) {
                     continue;
                 }
@@ -92,30 +97,33 @@ public class IndexWikiBzip2 {
                     continue;
                 }
 
-                if (random.nextDouble() > samplingRate) {
+                if (samplingRate > -1.0 &&
+                        random.nextDouble() > samplingRate) {
                     continue;
                 }
                 String s = cleaner.clean(page).replaceAll("\\n+", " ");
 
                 TextObject textObject = textObjectFactory.forText(s);
 
-                Optional<LdLocale> lang = languageDetector.detect(textObject);
-                String langString = "";
-                if (lang.isPresent()) {
-                    langString = lang.get().toString();
-                }
-                if (!langString.equals(fieldName)) {
-                    System.out.println("skipping: " + langString + " : " + s);
+                Optional<LdLocale> detectedLang = languageDetector.detect(textObject);
+                String detectedLangString = "";
+                if (detectedLang.isPresent()) {
+                    detectedLangString = detectedLang.get().toString();
+                } else {
                     continue;
                 }
-                System.out.println("indexing: "+s);
+                detectedLangString = detectedLangString.toLowerCase(Locale.US);
+                if (!detectedLangString.equals(fieldName) &&
+                        !detectedLangString.startsWith(fieldName+"-")) {
+                    System.out.println("skipping: " + detectedLangString + " : " + s);
+                    continue;
+                }
+//                System.out.println("indexing: "+s);
                 Document document = new Document();
-                document.add(new TextField(fieldName, s, Field.Store.NO));
+                document.add(new TextField(detectedLangString, s, Field.Store.NO));
                 indexWriter.addDocument(document);
                 pages++;
-                if (maxPages > -1 && pages > maxPages) {
-                    break;
-                }
+
             }
         }
 
@@ -128,6 +136,31 @@ public class IndexWikiBzip2 {
     private int countReports(Path bzipDir, String fieldName) throws IOException {
         int total = 0;
         long start = new Date().getTime();
+        int maxPFileName = -1;
+        for (File bzip : bzipDir.toFile().listFiles()) {
+            if (!bzip.getName().startsWith(fieldName)) {
+                continue;
+            }
+            Matcher m = Pattern.compile("p(\\d+)\\.bz2").matcher(bzip.getName());
+            System.out.println(bzip.getName());
+            if (m.find()) {
+                Integer lastP = null;
+                try {
+                    lastP = Integer.parseInt(m.group(1));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+                if (lastP != null && lastP > maxPFileName) {
+                    maxPFileName = lastP;
+                }
+            }
+        }
+        if (maxPFileName > -1) {
+            System.out.println("max pfilname: "+ maxPFileName);
+            return (int)(maxPFileName*0.70);
+            //return maxPFileName;
+        }
+        int skipped =0;
         for (File bzip : bzipDir.toFile().listFiles()) {
             if (!bzip.getName().startsWith(fieldName)) {
                 continue;
@@ -137,21 +170,23 @@ public class IndexWikiBzip2 {
                     new WikipediaBz2DumpInputStream(bzip.getAbsolutePath().toString());
             String page;
             while ((page = stream.readNext()) != null) {
+                total++;
 
                 if (total %1000 == 0) {
-                    long elapsed = new Date().getTime()-start;
-                    System.err.println("still counting: "+total + " : "+elapsed);
+                    double elapsed = (new Date().getTime()-start)/1000;
+                    System.err.println("still counting: "+total + " : with "+skipped +
+                            " skipped in " + elapsed +" seconds");
                 }
-                total++;
                 if (page.contains("<ns>") && !page.contains("<ns>0</ns>")) {
+                    skipped++;
                     continue;
                 }
 
                 String s = page;
                 if (redirectMatcher.reset(s).find()) {
+                    skipped++;
                     continue;
                 }
-
 
             }
         }
@@ -159,9 +194,11 @@ public class IndexWikiBzip2 {
     }
 
     private IndexWriter getIndexWriter(Path indexDir) throws IOException {
-        Analyzer analyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
+        AnalyzerManager analyzerManager = AnalyzerManager.newInstance();
 
-        IndexWriterConfig iwConfig = new IndexWriterConfig(analyzer);
+        IndexWriterConfig iwConfig = new IndexWriterConfig(analyzerManager.getCommonTokensAnalyzer());
+        iwConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+
         IndexWriter writer = new IndexWriter(FSDirectory.open(indexDir), iwConfig);
         return writer;
     }

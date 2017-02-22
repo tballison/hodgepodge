@@ -12,7 +12,7 @@
     <artifactId>wiki-munging</artifactId>
 
     <properties>
-        <lucene.version>6.4.1</lucene.version>
+        <lucene.version>5.5.3</lucene.version>
     </properties>
     <dependencies>
         <dependency>
@@ -39,6 +39,11 @@
             <groupId>com.optimaize.languagedetector</groupId>
             <artifactId>language-detector</artifactId>
             <version>0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-eval</artifactId>
+            <version>1.15-SNAPSHOT</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
