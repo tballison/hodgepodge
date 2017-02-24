@@ -32,6 +32,7 @@ import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class MarkupScraperTest {
@@ -142,6 +143,7 @@ public class MarkupScraperTest {
 
 
     @Test
+    @Ignore
     public void testOneOffLocal() throws Exception {
         String digest = "AAPL3VFVUU6B6GKHBVMVGI3ZFSYKBS5F";
         Path p = Paths.get("C:\\Users\\tallison\\Desktop\\working\\New folder (4)")

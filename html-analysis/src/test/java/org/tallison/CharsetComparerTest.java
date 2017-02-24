@@ -1,12 +1,5 @@
 package org.tallison;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import org.apache.tika.detect.EncodingDetector;
-import org.apache.tika.io.TikaInputStream;
-import org.apache.tika.metadata.Metadata;
 import org.junit.Test;
 
 /**
@@ -21,12 +14,12 @@ public class CharsetComparerTest {
             sb.append(" ");
         }
         CharsetComparer charsetComparer = new CharsetComparer();
-        List<EncodingDetector> detectors = charsetComparer.getDetectors();
+/*        List<EncodingDetector> detectors = charsetComparer.getDetectors();
         for (EncodingDetector detector : detectors ) {
             Charset detected = detector
                     .detect(TikaInputStream
                             .get(sb.toString().getBytes(StandardCharsets.UTF_8)), new Metadata());
             System.out.println(detector.getClass().getSimpleName() + " : " + detected);
-        }
+        }*/
     }
 }
