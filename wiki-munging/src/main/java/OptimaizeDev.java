@@ -9,6 +9,7 @@ import com.optimaize.langdetect.profiles.LanguageProfile;
 import com.optimaize.langdetect.profiles.LanguageProfileReader;
 import org.apache.commons.io.FileUtils;
 
+
 /**
  * Created by TALLISON on 2/7/2017.
  */

@@ -11,8 +11,7 @@ import com.optimaize.langdetect.profiles.LanguageProfileBuilder;
 import com.optimaize.langdetect.profiles.LanguageProfileReader;
 import com.optimaize.langdetect.profiles.LanguageProfileWriter;
 import org.wikiclean.WikiClean;
-import org.wikiclean.WikiCleanBuilder;
-import org.wikiclean.WikipediaBz2DumpInputStream;
+import org.wikiclean.WikipediaArticlesDump;
 
 /**
  * Created by TALLISON on 2/7/2017.
@@ -35,12 +34,12 @@ public class BuildOptimaizeLanguageModel {
         LanguageProfileBuilder languageProfileBuilder = new LanguageProfileBuilder(langCode);
         languageProfileBuilder.minimalFrequency(minFreq);
 
-        WikiClean cleaner = new WikiCleanBuilder()
+        WikiClean cleaner = new WikiClean.Builder()
                 .withLanguage(WikiClean.WikiLanguage.EN).withTitle(false)
                 .withFooter(false).build();
 
-        WikipediaBz2DumpInputStream stream =
-                new WikipediaBz2DumpInputStream(bzip.toAbsolutePath().toString());
+        WikipediaArticlesDump stream =
+                new WikipediaArticlesDump(bzip.toFile());
 
         List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
 
@@ -50,8 +49,7 @@ public class BuildOptimaizeLanguageModel {
                 .build();
 
 
-        String page;
-        while ((page = stream.readNext()) != null) {
+        for (String page : stream) {
             if (page.contains("<ns>") && !page.contains("<ns>0</ns>")) {
                 continue;
             }

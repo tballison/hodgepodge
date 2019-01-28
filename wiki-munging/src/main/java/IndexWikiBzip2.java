@@ -27,12 +27,11 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.tika.eval.tokens.AnalyzerManager;
 import org.wikiclean.WikiClean;
-import org.wikiclean.WikiCleanBuilder;
-import org.wikiclean.WikipediaBz2DumpInputStream;
+import org.wikiclean.WikipediaArticlesDump;
 
 public class IndexWikiBzip2 {
 
-    private WikiClean cleaner = new WikiCleanBuilder()
+    private WikiClean cleaner = new WikiClean.Builder()
             .withLanguage(WikiClean.WikiLanguage.EN).withTitle(false)
             .withFooter(false).build();
 
@@ -56,7 +55,6 @@ public class IndexWikiBzip2 {
                          String fieldName, int maxPages) throws IOException {
         IndexWriter indexWriter = getIndexWriter(indexDir);
 
-        String page;
         int pages = 0;
 
         int totalReports = countReports(bzipDir, fieldName);
@@ -71,8 +69,7 @@ public class IndexWikiBzip2 {
             if (maxPages > -1 && pages > maxPages) {
                 break;
             }
-            WikipediaBz2DumpInputStream stream =
-                    new WikipediaBz2DumpInputStream(bzip.getAbsolutePath().toString());
+            WikipediaArticlesDump stream = new WikipediaArticlesDump(bzip);
 
             List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
 
@@ -85,7 +82,7 @@ public class IndexWikiBzip2 {
             TextObjectFactory textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
 
 
-            while ((page = stream.readNext()) != null) {
+            for (String page : stream) {
                 if (maxPages > -1 && pages > maxPages) {
                     break;
                 }
@@ -166,10 +163,9 @@ public class IndexWikiBzip2 {
                 continue;
             }
 
-            WikipediaBz2DumpInputStream stream =
-                    new WikipediaBz2DumpInputStream(bzip.getAbsolutePath().toString());
-            String page;
-            while ((page = stream.readNext()) != null) {
+            WikipediaArticlesDump stream =
+                    new WikipediaArticlesDump(bzip);
+            for (String page : stream) {
                 total++;
 
                 if (total %1000 == 0) {
@@ -194,7 +190,7 @@ public class IndexWikiBzip2 {
     }
 
     private IndexWriter getIndexWriter(Path indexDir) throws IOException {
-        AnalyzerManager analyzerManager = AnalyzerManager.newInstance();
+        AnalyzerManager analyzerManager = AnalyzerManager.newInstance(1000000);
 
         IndexWriterConfig iwConfig = new IndexWriterConfig(analyzerManager.getCommonTokensAnalyzer());
         iwConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
