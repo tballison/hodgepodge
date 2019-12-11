@@ -11,7 +11,7 @@
 
     <artifactId>html-analysis</artifactId>
     <properties>
-        <tika.version>1.14</tika.version>
+        <tika.version>1.23</tika.version>
     </properties>
 
     <dependencies>
