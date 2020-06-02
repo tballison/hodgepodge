@@ -1,3 +1,4 @@
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,6 @@ public class TestGetUrls {
         assertEquals(60, urls.size());
     }
 
-    @Test
     public void testUrls2() throws Exception {
         String url = "https://dumps.wikimedia.org/enwiki/latest/";
         ArrayBlockingQueue<String> urls = GetWikiPageArticleBzips.getBzipUrls(url);
