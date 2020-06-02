@@ -19,16 +19,16 @@ import java.util.Set;
 public class SeleniumExample {
 
     public static void main(String[] args) throws Exception {
-        //String chromeDriverPath = "/usr/bin/chromedriver";
-        //System.setProperty("webdriver.chrome.driver", chromeDriverPath);
-        Path p = Paths.get(args[0]);
+        String chromeDriverPath = "/usr/bin/chromedriver";
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
+        //Path p = Paths.get(args[0]);
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200", "--ignore-certificate-errors", "--silent");
         WebDriver driver = new ChromeDriver(options);
 
         // Get the login page
         //TODO: add url
-        driver.get("insertUrlHere");
+        driver.get("c);
         List<WebElement> elements =
                 driver.findElements(By.tagName("a"));
         Set<String> links = new HashSet();
@@ -44,6 +44,7 @@ public class SeleniumExample {
         }
 
         System.out.println(driver.getPageSource());
+        System.out.println(links);
     }
 
 }
