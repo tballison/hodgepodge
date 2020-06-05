@@ -51,6 +51,7 @@
   <modules>
     <!--<module>selenium-example</module>-->
     <module>wiki-munging</module>
+    <module>trec-wapo-indexer</module>
   </modules>
 
   <build>

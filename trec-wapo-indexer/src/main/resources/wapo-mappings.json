@@ -1,0 +1,190 @@
+{
+  "index_patterns": [
+    "wapo"
+  ],
+  "mappings": {
+    "_meta": {
+      "version": "7.7.1"
+    },
+    "dynamic": "false",
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "all_text": {
+        "type": "text",
+        "analyzer": "text_en"
+      },
+      "paragraphs": {
+        "type": "text",
+        "analyzer": "text_en",
+        "store": true,
+        "copy_to": "all_text",
+        "fields": {
+          "porter": {
+            "type": "text",
+            "analyzer": "text_porter_en"
+          },
+          "shingle": {
+            "type": "text",
+            "analyzer": "text_shingle_en"
+          }
+        }
+      },
+      "paragraphs1": {
+        "type": "text",
+        "analyzer": "text_en",
+        "store": false,
+        "fields": {
+          "porter": {
+            "type": "text",
+            "analyzer": "text_porter_en"
+          },
+          "shingle": {
+            "type": "text",
+            "analyzer": "text_shingle_en"
+          }
+        }
+      },
+      "paragraphs2": {
+        "type": "text",
+        "analyzer": "text_en",
+        "store": false,
+        "fields": {
+          "porter": {
+            "type": "text",
+            "analyzer": "text_porter_en"
+          },
+          "shingle": {
+            "type": "text",
+            "analyzer": "text_shingle_en"
+          }
+        }
+      },
+      "paragraphs3": {
+        "type": "text",
+        "analyzer": "text_en",
+        "store": false,
+        "fields": {
+          "porter": {
+            "type": "text",
+            "analyzer": "text_porter_en"
+          },
+          "shingle": {
+            "type": "text",
+            "analyzer": "text_shingle_en"
+          }
+        }
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "text_en",
+        "copy_to": "all_text",
+        "fields": {
+          "porter": {
+            "type": "text",
+            "analyzer": "text_porter_en"
+          },
+          "shingle": {
+            "type": "text",
+            "analyzer": "text_shingle_en"
+          }
+        }
+      },
+      "author": {
+        "type": "text",
+        "analyzer": "text_en",
+        "copy_to": "all_text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "normalizer": "lc_normalizer"
+          }
+        }
+      },
+      "kicker": {
+        "type": "keyword"
+      },
+      "story_type": {
+        "type": "keyword"
+      },
+      "pub_date": {
+        "type": "date"
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "analysis": {
+        "normalizer": {
+          "lc_normalizer": {
+            "type": "custom",
+            "char_filter": [],
+            "filter": [
+              "lowercase",
+              "asciifolding"
+            ]
+          }
+        },
+        "filter": {
+          "trim_final_period": {
+            "type": "pattern_replace",
+            "pattern": "\\.$",
+            "replacement": ""
+          },
+          "minimal_english": {
+            "type": "stemmer",
+            "name": "minimal_english"
+          },
+          "shingle": {
+            "max_shingle_size": "3",
+            "min_shingle_size": "2",
+            "type": "shingle"
+          }
+        },
+        "analyzer": {
+          "text_en": {
+            "tokenizer": "uax_url_email",
+            "filter": [
+              "lowercase",
+              "asciifolding",
+              "trim_final_period"
+            ],
+            "type": "custom"
+          },
+          "text_porter_en": {
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "porter_stem"
+            ],
+            "type": "custom"
+          },
+          "text_minimal_en": {
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "asciifolding",
+              "minimal_english"
+            ],
+            "type": "custom"
+          },
+          "text_shingle_en": {
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "asciifolding",
+              "shingle"
+            ],
+            "type": "custom"
+          }
+        }
+      },
+      "number_of_replicas": "2",
+      "number_of_shards": "5"
+    }
+  }
+}
+
+
+
