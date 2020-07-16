@@ -8,6 +8,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.lucene.analysis.Analyzer;
@@ -259,11 +260,11 @@ public class WikiToTableSimple {
                     if (sentBit.length() < MIN_SENT_LENGTH) {
                         continue;
                     }
-                    String md5 = hash(sentBit);
-                    if (digests.contains(md5)) {
+                    String digest = hash(sentBit);
+                    if (digests.contains(digest)) {
                         continue;
                     }
-                    digests.add(md5);
+                    digests.add(digest);
                     writer.write(sentBit);
                     writer.write("\n");
                 }
@@ -284,7 +285,8 @@ public class WikiToTableSimple {
                 sb.append(charTermAttribute.toString()).append(" ");
             }
         }
-        return DigestUtils.sha256Hex(sb.toString());
+
+        return Base64.encodeBase64String(DigestUtils.sha256(sb.toString()));
     }
 
 

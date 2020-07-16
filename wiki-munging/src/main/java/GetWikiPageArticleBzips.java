@@ -110,6 +110,10 @@ public class GetWikiPageArticleBzips {
                 }
                 HttpClient client = HttpUtils.getDefaultClient();
                 Path target = outputDir.resolve(file);
+                if (Files.exists(target)) {
+                    System.err.println("already exists: "+target);
+                    continue;
+                }
                 String url = urlBase+"/"+file;
                 System.err.println("getting "+url);
                 HttpUtils.get(client, url, target);
