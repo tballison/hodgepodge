@@ -1,7 +1,6 @@
 
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
-import edu.stanford.nlp.simple.Token;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -30,17 +29,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This hashes every sentence and only outputs uniquely hashed sentences.
+ * This is not exceedingly efficient, and I needed to allocate 20GB -Xmx
+ * to get it to process the full English wikipedia.
+ */
 public class WikiToTableSimple {
 
     static Pattern BYTES_FLIPPER = Pattern.compile("<text bytes=\"(\\d+)\" xml:space=\\\"preserve\\\">");
@@ -159,7 +159,9 @@ public class WikiToTableSimple {
                                              Files.newOutputStream(tableFile)
                                      ), StandardCharsets.UTF_8))) {
             SkipCounter skipCounter = new SkipCounter();
-            for (File bzip : bzipDir.toFile().listFiles()) {
+            File[] bzips = bzipDir.toFile().listFiles();
+            Arrays.sort(bzips);
+            for (File bzip : bzips) {
                 if (!bzip.getName().startsWith(targLang)) {
                     System.out.println("skipping: " + bzip.getName());
                     continue;
