@@ -1,11 +1,4 @@
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
-import org.tallison.quaerite.connectors.SearchClient;
-import org.tallison.quaerite.connectors.SearchClientException;
-import org.tallison.quaerite.connectors.SearchClientFactory;
-import org.tallison.quaerite.core.StoredDocument;
+
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -23,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WapoIndexer {
-
+/*
     private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     public static void main(String[] args) throws Exception {
         Path json = Paths.get(args[0]);
@@ -175,5 +168,5 @@ public class WapoIndexer {
                     ", urls=" + urls +
                     '}';
         }
-    }
+    }*/
 }
