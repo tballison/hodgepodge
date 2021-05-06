@@ -34,17 +34,25 @@ public class RenderPages {
         RenderPages ex = new RenderPages();
         ex.execute(Paths.get(args[0]), Paths.get(args[1]));
     }
-    private int pageNumber = 1;
+    private int pageNumber = 0;
     private void execute(Path src, Path imageDir) {
         System.out.println(src);
-        for (File f : src.toFile().listFiles()) {
-            if (f.getName().toLowerCase().endsWith(".pdf")) {
-                System.out.println("processing: "+f);
-                try {
-                    processFile(f, imageDir);
-                } catch (Exception e) {
-                    e.printStackTrace();
+        if (Files.isDirectory(src)) {
+            for (File f : src.toFile().listFiles()) {
+                if (f.getName().toLowerCase().endsWith(".pdf")) {
+                    System.out.println("processing: " + f);
+                    try {
+                        processFile(f, imageDir);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
+            }
+        } else {
+            try {
+                processFile(src.toFile(), imageDir);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -52,25 +60,25 @@ public class RenderPages {
     private void processFile(File f, Path imageDir) throws IOException {
         String imageBaseName = f.getName().replaceAll("(?i).pdf$", "");
         try (PDDocument pd = PDDocument.load(f)) {
-            for (int i = 1; i < pd.getNumberOfPages(); i++) {
+            System.out.println(pd.getNumberOfPages());
+            for (int i = 0; i < pd.getNumberOfPages(); i++) {
                 System.out.println("processing "+f + " page: "+i);
                 try {
-                    Path imageSubDir = imageDir.resolve(imageBaseName);
-                    Files.createDirectories(imageSubDir);
-                    processPage(pd, imageSubDir, imageBaseName);
+                    Files.createDirectories(imageDir);
+                    processPage(pd, imageDir, imageBaseName);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
-        pageNumber = 1;
+        pageNumber = 0;
     }
 
     private void processPage(PDDocument pd, Path imageDir, String imageBaseName) throws Exception {
         Path output = imageDir.resolve(imageBaseName+"_"+pageNumber+".jpg");
         PDFRenderer renderer = new PDFRenderer(pd);
 
-            BufferedImage image = renderer.renderImage(pageNumber, 5, ImageType.RGB);
+            BufferedImage image = renderer.renderImage(pageNumber, 2, ImageType.RGB);
             try (OutputStream os = Files.newOutputStream(output)) {
                 //TODO: get output format from TesseractConfig
                 ImageIOUtil.writeImage(image, "jpeg",

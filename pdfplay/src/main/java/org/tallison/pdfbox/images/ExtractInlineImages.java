@@ -47,14 +47,22 @@ public class ExtractInlineImages {
     private int pageNumber = 1;
     private void execute(Path src, Path imageDir) {
         System.out.println(src);
-        for (File f : src.toFile().listFiles()) {
-            if (f.getName().toLowerCase().endsWith(".pdf")) {
-                System.out.println("processing: "+f);
-                try {
-                    processFile(f, imageDir);
-                } catch (Exception e) {
-                    e.printStackTrace();
+        if (Files.isDirectory(src)) {
+            for (File f : src.toFile().listFiles()) {
+                if (f.getName().toLowerCase().endsWith(".pdf")) {
+                    System.out.println("processing: " + f);
+                    try {
+                        processFile(f, imageDir);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
+            }
+        } else {
+            try {
+                processFile(src.toFile(), imageDir);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
